@@ -1,0 +1,370 @@
+Problem 1: Online Inventory Management System
+You are tasked with creating an Online Inventory Management System for a retail store. The
+system should allow users to add new products to the database, update existing product
+details, view the current inventory, and generate reports on product sales. Design and
+implement the ADO.NET data access layer to interact with the database, perform CRUD
+(Create, Read, Update, Delete) operations, and retrieve data for generating sales reports.
+
+
+
+
+Sqlquery
+
+
+
+create table product(
+prodid int,
+prodname varchar(100),
+price money,
+quantity int);
+
+go
+
+create procedure insertprod(@prodid int,@prodname varchar(100),@price money,@quantity int)
+as
+begin
+insert into product(prodid,prodname,price,quantity)values(@prodid,@prodname,@price,@quantity)
+end
+go
+
+create procedure updateprice(@prodid int, @updatedprice money)
+as
+begin
+update product set price=@updatedprice where prodid=@prodid;
+END
+GO
+
+create Procedure usp_updateprodqty
+as
+begin
+update product set quantity=90 where quantity<50;
+end
+go
+
+
+create Procedure updateprodname(@prodid int,@updateprodname varchar(100))
+as
+begin
+update product set prodname=@updateprodname where prodid=@prodid;
+end
+go
+
+
+create procedure selectproduct
+as
+begin
+select * from product;
+end
+go
+
+
+
+create procedure deleteproduct(@prodid int)
+as
+begin
+delete from product where prodid=@prodid;
+end
+go
+
+
+
+
+CREATE PROCEDURE GetSalesReport
+AS
+BEGIN
+    SELECT Prodname, SUM(quantity) AS TotalSales
+    FROM Product
+    GROUP BY Prodname;
+END
+
+
+
+Prod.cs
+
+
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProductSales
+{
+    internal class Prod
+    {
+        //connecting to backend db assesment
+        static string connectionstring = "Data Source=ICS-LT-G7T61F3\\SQLEXPRESS01;Initial Catalog=assesement.db;Integrated Security=True;";
+
+        //its to insert data in to database
+        public static void Insert(int prodid, string prodname, int price, int quantity)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                {
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.Connection = con;
+                    cmd.CommandText = "insertprod";
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlParameter param1 = new SqlParameter();
+                    param1.ParameterName = "@prodid";
+                    param1.SqlDbType = SqlDbType.Int;
+                    param1.Value = prodid;
+
+
+
+                    cmd.Parameters.Add(param1);
+
+
+
+                    SqlParameter param2 = new SqlParameter();
+                    param2.ParameterName = "@prodname";
+                    param2.SqlDbType = SqlDbType.VarChar;
+                    param2.Value = prodname;
+
+
+
+                    cmd.Parameters.Add(param2);
+
+
+
+                    SqlParameter param3 = new SqlParameter();
+                    param3.ParameterName = "@price";
+                    param3.SqlDbType = SqlDbType.Money;
+                    param3.Value = price;
+
+
+
+                    cmd.Parameters.Add(param3);
+
+
+
+                    SqlParameter param4 = new SqlParameter();
+                    param4.ParameterName = "@quantity";
+                    param4.SqlDbType = SqlDbType.Int;
+                    param4.Value = quantity;
+
+
+
+                    cmd.Parameters.Add(param4);
+
+
+
+                    con.Open();
+                    int i = cmd.ExecuteNonQuery();
+                    if (i > 0)
+                    {
+                        Console.WriteLine(prodname + "data inserted succesfully");
+                    }
+                }
+
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static void Getprodinfo()//to read a data stored in table
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                {
+                    
+                    SqlCommand command = new SqlCommand();
+                    command.Connection = con;
+                    command.CommandText = "selectproduct";
+                    command.CommandType = CommandType.StoredProcedure;
+                    //open the connection and execute the reader
+                    con.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                Console.WriteLine("{0} {1} {2} {3}",
+                                    reader[0], reader[1], reader[2], reader[3]);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("No records found");
+                        }
+                        reader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+
+        //update the data
+        public static void UpdateProduct(int quantity)
+        {
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                {
+                    SqlCommand command = new SqlCommand();
+                    command.Connection = con;
+                    command.CommandText = "usp_updateprodqty";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    con.Open();
+                    int i = command.ExecuteNonQuery();//this method to update data
+
+                    if (i > 0)
+                    {
+                        Console.WriteLine("qty updated successfully");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+        public static void DeleteProduct(int prodid)
+        {
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                {
+                    
+                    SqlCommand command = new SqlCommand();
+                    command.Connection = con;
+                    command.CommandText = "deleteproduct";
+                    command.CommandType= CommandType.StoredProcedure;
+
+                    SqlParameter param1 = new SqlParameter();
+                    param1.ParameterName = "@prodid";
+                    param1.SqlDbType = SqlDbType.Int;
+                    param1.Direction = ParameterDirection.Input;
+                    param1.Value = prodid;
+
+
+
+                    command.Parameters.Add(param1);
+
+                    con.Open();
+                    int i = command.ExecuteNonQuery();
+                    if (i>0)
+                    {
+                        Console.WriteLine("deleted successfully");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+            
+        }
+
+        public static void ReportProduct()
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                {
+
+                    SqlCommand command = new SqlCommand();
+                    command.Connection = con;
+                    command.CommandText = "GetSalesReport";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    con.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while(reader.Read())
+                    {
+                        string prodname = reader["prodname"].ToString();
+                        int totalSales = Convert.ToInt32(reader["TotalSales"]);
+                        Console.WriteLine($"Product{prodname}, {totalSales}");
+                    }
+                    reader.Close();
+
+                }
+
+            }
+            catch(Exception ex ) 
+            { 
+              Console.WriteLine (ex.Message);
+            }
+               
+        }
+
+
+
+    }
+}
+
+
+Program.cs
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProductSales
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            //Insertoprod();
+           // Prod.Getprodinfo();
+            //Prod.UpdateProduct(8);
+           // Prod.DeleteProduct(105008);
+           // Prod.ReportProduct();
+            Console.ReadLine();
+        }
+
+        private static void Insertoprod()
+        {
+            Prod.Insert(104366, "iphone", 234560, 1);
+            Prod.Insert(109999, "redmi", 230000, 1);
+            Prod.Insert(1098542, "Vivo", 20000, 2);
+            Prod.Insert(105008, "oppo", 20000, 2);
+
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

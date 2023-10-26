@@ -1,0 +1,69 @@
+: E-Commerce Website with Inventory Management
+You are tasked with building an e-commerce website for a retail business that sells various
+products. To implement the inventory management, you need to use Entity Framework Core
+to store and update product availability in a database. Use the new Scaffolded Item to create
+automation of the code for CRUD operations.
+
+
+prod.cs in models
+
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceInventory.Models
+{
+    public class Prod
+    {
+        [Key]
+        public int ProductId { get; set; }
+        public string? ProductName { get; set; }
+        public float Price { get; set; }
+        public float prodQuantity { get; set; }
+    }
+}
+
+
+
+cust.cs in models
+
+
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceInventory.Models
+{
+    public class Cust
+    {
+
+        [Key]
+        public int CustID { get; set; }
+        public string? CustName { get; set; }
+        public string? CustAddress { get; set; }
+        public int CustPhone { get; set; }
+        public string? CustEmail { get; set; }
+        
+
+    }
+}
+
+
+orders.cs in models
+
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceInventory.Models
+{
+    public class Order
+    {
+
+        [Key]
+        public int OrderID { get; set; }
+
+        public Prod? Product { get; set; }
+
+        public Cust? Customer { get; set; }
+        public int OrderQty { get; set; }
+        public float Amount { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime OrderDate { get; set; }
+    }
+}

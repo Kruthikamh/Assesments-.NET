@@ -1,0 +1,212 @@
+
+2. Create a C#.Net Console application to implement multiple inheritance with multiple
+interfaces. Define a BankAccount class which implements ISavingsAccount,
+ICurrentAccount, IGoldLoanAccount interfaces. Each interface has a specific method
+signature to calculate Interest.
+Implement all Interface methods in the BankAccount class.Create user interface in
+the program class main(). Define a menu to calculate interest of a specific account
+type and display the same.
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingApp
+{
+        interface ISavingAcc
+        {
+            double CalSavingsInterset(double bal);
+        }
+        interface ICurrentAcc
+        {
+            double CalCurrentInterset(double bal);
+        }
+        interface IGoldLoanAcc
+        {
+            double GoldLoanInterset(double capitalamm);
+        }
+        class BankAcc: ISavingAcc, ICurrentAcc, IGoldLoanAcc
+        {
+            public double CalSavingsInterset(double bal)
+            {
+                double interset = 0.05;
+                return bal* interset;
+            }
+            public double CalCurrentInterset(double bal)
+            {
+                double interset = 0.03;
+                return bal* interset;
+            }
+            public double GoldLoanInterset(double capitalamm)
+            {
+                double interset = 0.04;
+                return capitalamm* interset;
+            }
+
+        }
+    }
+
+
+
+
+
+
+program.cs
+
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingApp
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            BankAcc acc = new BankAcc();
+
+            Console.WriteLine(" Select an account Type:");
+            Console.WriteLine("savings account");
+            Console.WriteLine("Current account");
+            Console.WriteLine("gold Loan account");
+            int choice = int.Parse(Console.ReadLine());
+
+            double result=0.0;
+            switch (choice)
+            {
+                case 1:
+                    Console.WriteLine("enter your balance ammount");
+                    double mysavings = double.Parse(Console.ReadLine());
+                    result = acc.CalSavingsInterset(mysavings);
+                    break;
+                 case 2:
+                    Console.WriteLine("enter your current account balance ammount");
+                    double mycurrent = double.Parse(Console.ReadLine());
+                    result = acc.CalCurrentInterset(mycurrent);
+                    break;
+                 case 3:
+                    Console.WriteLine("enter your captialammount");
+                    double mycaptial= double.Parse(Console.ReadLine());
+                    result = acc.CalCurrentInterset(mycaptial);
+                    break;
+
+                default: Console.WriteLine("wrong choice");
+                    break;
+            }
+            Console.WriteLine("My Ammount:" +result);
+            Console.ReadLine();
+
+
+
+        }
+    }
+}
+3. Define a schema for a Airlines Travel Agency in the SQL server. Schema is to store
+data about flight schedules, reservations, and customer data. Define relevant
+columns for each table and make relationships amongst tables.
+Create an ASP.NET Core web application to implement the above schema with Entity
+Framework Core database first approach. You are able to add, modify, remove flight
+schedules for different starting locations and destination locations with their fare price
+and flight numbers. Able to add , modify and delete customer information. Able to
+book (reserve) tickets and cancel (delete) tickets for customers for specific flight
+schedules.
+
+
+
+
+
+
+ create table customers(
+  CustomerID int primary key not null,
+  Firstname varchar(10),
+  Lastname varchar(10),
+  Phoneno varchar(10),
+  Email varchar(10),
+  );
+  go
+
+create table flightschedules
+(
+  FlightID int primary key not null,
+  FlightNumber varchar(100) not null,
+  Airline varchar(100) not null,
+  DepatureTime DateTime not null,
+  ArrivalTime DateTime not null,
+  DepAirport varchar(100),
+  arrivalAirport varchar(100),
+
+  );
+
+  
+
+  create table reservations(
+  ReservationID int primary key not null,
+  CustomerID int foreign key references customers(CustomerID),
+  FlightID int foreign key references flightschedules(FlightID),
+  SeatNo int not null,
+  ReservationTime DateTime not null,
+  );
+  go
+
+
+appsettings.cs
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DbAirlineApp": "Data Source=ICS-LT-G7T61F3\\SQLEXPRESS01;Initial Catalog=7Assesment;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;",
+    "AirLineContext": "Server=(localdb)\\mssqllocaldb;Database=AirLine.Data;Trusted_Connection=True;MultipleActiveResultSets=true"
+  }
+}
+
+
+program.cs
+  
+using AirLine.Data;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddDbContext<DbfirstAirlines>(options=> options.UseSqlServer(builder.Configuration.GetConnectionString("DbAirlineApp")??
+    throw new InvalidOperationException("Connection not found")));
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+app.Run();
+
+
+
